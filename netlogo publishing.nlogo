@@ -100,9 +100,7 @@ to read-publications
             ]
           ]
         type "exposed papers-read" show papers-read 
-        ;;set belief mean [evidence] of papers-read * suggestibility / 100
-                                              ;; set belief based on publication strength, prior belief
-         ]
+        ]
       ]                
       [if any? visible with [publication?]   ;; each agent checks for publication in neighbouring patches
          [ set exposed? true                   ;; if yes, set exposed variable true
@@ -115,15 +113,21 @@ to read-publications
             ]
           ]
            type "papers-read" show papers-read
-           ;;set belief mean [evidence] of papers-read * suggestibility / 100
-                                              ;; set belief based on evidence of papers read, suggestibility
-         ]
+           ]
       ]
   ]
 end
 
 to update-belief
   ask agents [
+    if exposed? [
+      let new-evidence []
+      foreach papers-read [ set new-evidence sentence [evidence] of ? new-evidence ]
+      type "new-evidence" show new-evidence
+      set belief mean new-evidence * suggestibility / 100
+      type "belief" show belief             ;; set belief based on publication strength, prior belief
+    ]
+         
     if belief > support-threshold and culture > culture-support-threshold
       [ set active-pro? true
       ]                                     ;; if belief above threshold (and culture above threshold?), agent becomes active in support
