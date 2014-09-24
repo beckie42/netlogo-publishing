@@ -31,30 +31,31 @@ to setup
   setup-agents
   setup-patches
   setup-instigator
-  update-patches
-  set culture mean [belief] of agents
+  update-culture
   reset-ticks
 end
 
 to go
   read-publications
   update-belief
+  update-culture
   move
   publish 
-  update-patches
 end
 
 to setup-agents
   create-agents number-agents [ 
     set shape "person" 
+    set color blue
     ;;setxy random-xcor random-ycor
     setxy 0 random 3 
     set exposed? false
     set papers-read []
+    set papers-authored []
     set active-pro? false
     set active-con? false
-    set influence random-normal 50 18
-    set suggestibility random-normal 50 18
+    set influence median (list 0 (random-normal 50 20) 1)
+    set suggestibility median (list 0 (random-normal 50 20) 1)
     ]
 end
 
@@ -72,18 +73,16 @@ to setup-instigator
     set papers-read (list patch-here)
     set belief first-paper-strength ;; modified by suggestibility? something else?
     set active-pro? true
+    set color green
     set publication? true
     set papers-authored (list patch-here)
-    set evidence (list first-paper-strength)
+    set evidence first-paper-strength
+    ask patch-here [set pcolor scale-color yellow evidence 100 0]
   ] 
 end
 
-to update-patches
-  ask patches [ 
-    if publication? [
-      let evcolor mean evidence
-      set pcolor scale-color red evcolor 100 0 ]
-  ]
+to update-culture
+  set culture mean [belief] of agents
 end
 
 to read-publications
@@ -132,14 +131,16 @@ to update-belief
       set belief belief * ( 1 + bias )
     ]
     if active-con? [
-      set belief belief * (1 - bias )
+      set belief belief * ( 1 - bias )
     ]
          
     if belief > support-threshold and culture > culture-support-threshold
       [ set active-pro? true
+        set color green
       ]                                     ;; if belief above threshold (and culture above threshold?), agent becomes active in support
     if belief < attack-threshold and culture > culture-attack-threshold
       [ set active-con? true
+        set color red
       ]
                                        ;; if belief below threshold (and culture below threshold?), agent becomes active against belief
   ]
@@ -155,24 +156,29 @@ end
 to publish
   ask agents [
     if active-pro? or active-con?           ;; if active,
-      [if not publication?      ;; tries to publish (assign evidence)
+      [if not publication?                  ;; if no publication on patch, tries to publish (assign evidence)
         [
+        type "author" show self
         let prior belief * 100 / suggestibility
-        let new-evidence prior * random-normal 1 18 
+        let new-evidence abs (prior / 100 * median (list 0 (random-normal 50 20) 1))
+        type "new-evidence" show new-evidence 
   
-        let reviewers min-n-of 3 agents [ distance myself ]
+        let reviewers min-n-of 3 (other agents) [ distance myself ]
         let decisions []
         ask reviewers [
           let decision 50
           ifelse exposed?
-          [ set decision belief * new-evidence / 100]           ;; should depend on papers-read?
+          [ set decision belief * new-evidence / 100]           
           [ set decision suggestibility * new-evidence / 100]
+          type "decision" show decision
           set decisions fput decision decisions
         ]
         if mean decisions > 50 [
           set papers-authored fput patch-here papers-authored
           type "published" show papers-authored
-          ask patch-here [ set evidence new-evidence ]
+          ask patch-here [ 
+            set evidence new-evidence
+            set pcolor scale-color yellow evidence 100 0 ]
         ]
         ]
       ]
@@ -249,7 +255,7 @@ number-agents
 number-agents
 0
 100
-4
+31
 1
 1
 NIL
@@ -294,7 +300,7 @@ culture-support-threshold
 culture-support-threshold
 0
 100
-50
+21
 1
 1
 %
@@ -309,7 +315,7 @@ attack-threshold
 attack-threshold
 0
 100
-50
+14
 1
 1
 %
@@ -339,7 +345,7 @@ bias
 bias
 0
 100
-50
+0
 1
 1
 %
