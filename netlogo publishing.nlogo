@@ -127,6 +127,13 @@ to update-belief
       set belief mean new-evidence * suggestibility / 100
       type "belief" show belief             ;; set belief based on publication strength, prior belief
     ]
+    
+    if active-pro? [
+      set belief belief * ( 1 + bias )
+    ]
+    if active-con? [
+      set belief belief * (1 - bias )
+    ]
          
     if belief > support-threshold and culture > culture-support-threshold
       [ set active-pro? true
@@ -173,9 +180,9 @@ to publish
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-247
+287
 10
-686
+726
 470
 16
 16
@@ -236,7 +243,7 @@ NIL
 SLIDER
 13
 66
-185
+260
 99
 number-agents
 number-agents
@@ -249,10 +256,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-115
-196
-148
+13
+98
+260
+131
 first-paper-strength
 first-paper-strength
 0
@@ -260,44 +267,44 @@ first-paper-strength
 75
 1
 1
-NIL
+%
 HORIZONTAL
 
 SLIDER
-15
-160
-187
+13
+129
+260
+162
+support-threshold
+support-threshold
+0
+100
+50
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+13
+161
+260
+194
+culture-support-threshold
+culture-support-threshold
+0
+100
+50
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+13
 193
-support-threshold
-support-threshold
-0
-100
-50
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-16
-204
-236
-237
-culture-support-threshold
-culture-support-threshold
-0
-100
-50
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-17
-249
-189
-282
+260
+226
 attack-threshold
 attack-threshold
 0
@@ -305,14 +312,14 @@ attack-threshold
 50
 1
 1
-NIL
+%
 HORIZONTAL
 
 SLIDER
-18
-293
-228
-326
+13
+226
+260
+259
 culture-attack-threshold
 culture-attack-threshold
 0
@@ -320,7 +327,22 @@ culture-attack-threshold
 50
 1
 1
-NIL
+%
+HORIZONTAL
+
+SLIDER
+13
+258
+260
+291
+bias
+bias
+0
+100
+50
+1
+1
+%
 HORIZONTAL
 
 @#$#@#$#@
