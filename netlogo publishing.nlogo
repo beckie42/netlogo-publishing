@@ -40,7 +40,8 @@ to go
   update-belief
   update-culture
   move
-  publish 
+  publish
+  update-plots 
 end
 
 to setup-agents
@@ -54,8 +55,8 @@ to setup-agents
     set papers-authored []
     set active-pro? false
     set active-con? false
-    set influence median (list 0 (random-normal 50 20) 1)
-    set suggestibility median (list 0 (random-normal 50 20) 1)
+    set influence median (list 0 (random-normal 50 20) 100)
+    set suggestibility median (list 0 (random-normal 50 20) 100)
     ]
 end
 
@@ -159,8 +160,9 @@ to publish
       [if not publication?                  ;; if no publication on patch, tries to publish (assign evidence)
         [
         type "author" show self
-        let prior belief * 100 / suggestibility
-        let new-evidence abs (prior / 100 * median (list 0 (random-normal 50 20) 1))
+        ;;let prior belief * 100 / suggestibility
+        ;;let new-evidence prior / 100 * median (list 0 (random-normal 50 20) 100)
+        let new-evidence median (list 0 (random-normal 50 20) 100)
         type "new-evidence" show new-evidence 
   
         let reviewers min-n-of 3 (other agents) [ distance myself ]
@@ -168,8 +170,8 @@ to publish
         ask reviewers [
           let decision 50
           ifelse exposed?
-          [ set decision belief * new-evidence / 100]           
-          [ set decision suggestibility * new-evidence / 100]
+          [ set decision belief * new-evidence / 50]           
+          [ set decision suggestibility * new-evidence / 50]
           type "decision" show decision
           set decisions fput decision decisions
         ]
@@ -315,7 +317,7 @@ attack-threshold
 attack-threshold
 0
 100
-14
+5
 1
 1
 %
@@ -330,7 +332,7 @@ culture-attack-threshold
 culture-attack-threshold
 0
 100
-50
+3
 1
 1
 %
@@ -350,6 +352,24 @@ bias
 1
 %
 HORIZONTAL
+
+PLOT
+16
+308
+216
+458
+Distribution of Belief
+Belief
+Agents
+0.0
+100.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -15040220 true "" "histogram [belief] of agents"
 
 @#$#@#$#@
 ## WHAT IS IT?
